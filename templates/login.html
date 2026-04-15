@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}Login – Lost & Found{% endblock %}
+{% block content %}
+<div class="notepad-page-container">
+  <div class="notepad-sheet" style="max-width: 500px;">
+    <div class="auth-brand" style="text-align: center; margin-bottom: 2rem;">
+      <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">🔍</span>
+      <h1 class="page-title" style="position:static; transform:none; left:0; font-size: 2.2rem;">Welcome Back</h1>
+      <p class="page-sub">Sign in to sync your notepad</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('login') }}" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="username" class="hand-label" style="font-size: 1.2rem;">Username</label>
+        <input type="text" id="username" name="username" class="notepad-input" placeholder="Your handwritten name"
+          required autocomplete="username" />
+      </div>
+      <div class="form-group" style="margin-top: 1.5rem;">
+        <label for="password" class="hand-label" style="font-size: 1.2rem;">Password</label>
+        <div class="input-eye-wrap" style="position:relative;">
+          <input type="password" id="password" name="password" class="notepad-input" placeholder="Your secret code"
+            required autocomplete="current-password" />
+          <button type="button" class="eye-btn" onclick="togglePassword('password')"
+            style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:1.2rem;">👁</button>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top: 3rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Sign In</button>
+      </div>
+    </form>
+
+    <p class="auth-switch" style="text-align: center; margin-top: 2rem; font-family: var(--font-accent);">
+      New here?
+      <a href="{{ url_for('register') }}" style="color: var(--primary); text-decoration: none;">Create an account
+        &rarr;</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function togglePassword(id) {
+    const el = document.getElementById(id);
+    el.type = el.type === 'password' ? 'text' : 'password';
+  }
+</script>
+{% endblock %}
+<!-- website link -->
+<!-- http://127.0.0.1:5001/ -->

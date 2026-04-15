@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block title %}My Items – Lost & Found{% endblock %}
+{% block content %}
+<div class="notepad-page-container">
+  <div class="notepad-sheet">
+    <div class="page-header">
+      <h1 class="page-title">My Reported Items</h1>
+      <p class="page-sub">A personal record of everything you've shared with the board.</p>
+    </div>
+
+    {% if items %}
+    <div class="scrap-list">
+      {% for item in items %}
+      <div class="scrap-paper fade-in" id="myitem-{{ item.id }}">
+        <div class="scrap-img-wrap">
+          {% if item.image_path %}
+          <img src="{{ url_for('uploaded_file', filename=item.image_path) }}"
+               alt="{{ item.title }}" class="scrap-img" loading="lazy"/>
+          {% else %}
+          <div class="scrap-img-placeholder scrap-img">📷</div>
+          {% endif %}
+        </div>
+        
+        <div class="scrap-content">
+          <div class="card-meta">
+            <span class="card-category">{{ item.category }}</span>
+            <span class="card-date">{{ item.created_at[:10] }}</span>
+          </div>
+          <h3 class="card-title">
+            <a href="{{ url_for('item_detail', item_id=item.id) }}" style="text-decoration:none; color:inherit;">
+              {{ item.title }}
+            </a>
+          </h3>
+          <p class="card-desc" style="margin: 0.3rem 0;">{{ item.description[:80] }}{% if item.description|length > 80 %}…{% endif %}</p>
+          <div style="display:flex; gap: 0.8rem; margin-top: 0.5rem;">
+            <span class="badge badge-{{ item.status|lower }}" style="position:static; transform:none; font-size:0.75rem;">{{ item.status }}</span>
+            <span class="badge badge-{{ item.claim_status|lower }}" style="position:static; transform:none; font-size:0.75rem;">{{ item.claim_status }}</span>
+          </div>
+        </div>
+
+        <div class="scrap-actions">
+          <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-ghost btn-sm">View</a>
+          <button class="btn btn-danger btn-sm" onclick="deleteItem({{ item.id }})">🗑 Delete</button>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="empty-state" style="margin-top: 4rem;">
+      <span style="font-size: 4rem;">📋</span>
+      <h2>Your notepad is empty</h2>
+      <p>Once you report an item, it will be listed here.</p>
+      <div style="margin-top: 2rem;">
+        <a href="{{ url_for('report') }}" class="btn btn-primary">+ Create First Entry</a>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+async function deleteItem(id) {
+  if (!confirm('Delete this item? This action cannot be undone.')) return;
+  try {
+    const res  = await fetch(`/delete/${id}`, { method: 'POST' });
+    const data = await res.json();
+    if (data.ok) {
+      const el = document.getElementById('myitem-' + id);
+      el.style.opacity = '0';
+      el.style.transition = 'opacity 0.4s';
+      setTimeout(() => el.remove(), 400);
+      showToast('Item deleted.', 'success');
+    } else { showToast(data.error || 'Error.', 'error'); }
+  } catch { showToast('Network error.', 'error'); }
+}
+</script>
+{% endblock %}

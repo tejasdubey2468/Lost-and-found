@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{% block title %}Lost & Found{% endblock %}</title>
+  <meta name="description" content="Lost & Found – Help reunite people with their lost belongings."/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;500;600&family=Patrick+Hand&family=Gochi+Hand&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"/>
+  {% block head %}{% endblock %}
+</head>
+<body>
+
+<!-- ── NAV ──────────────────────────────────────── -->
+{% if session.get('user_id') %}
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="{{ url_for('dashboard') }}" class="nav-logo">Lost&nbsp;&amp;&nbsp;Found</a>
+    <div class="nav-links">
+      <a href="{{ url_for('dashboard') }}"  class="nav-link {% if request.endpoint=='dashboard' %}active{% endif %}">Dashboard</a>
+      <a href="{{ url_for('report') }}"     class="nav-link {% if request.endpoint=='report' %}active{% endif %}">Report Item</a>
+      <a href="{{ url_for('my_items') }}"   class="nav-link {% if request.endpoint=='my_items' %}active{% endif %}">My Items</a>
+    </div>
+    <div class="nav-right">
+      <span class="nav-user">👤 {{ session.username }}</span>
+      <a href="{{ url_for('logout') }}" class="btn btn-ghost btn-sm">Logout</a>
+    </div>
+    <button class="hamburger" id="hamburger" aria-label="Menu">&#9776;</button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="{{ url_for('dashboard') }}"  class="mob-link">Dashboard</a>
+    <a href="{{ url_for('report') }}"     class="mob-link">Report Item</a>
+    <a href="{{ url_for('my_items') }}"   class="mob-link">My Items</a>
+    <a href="{{ url_for('logout') }}"     class="mob-link">Logout</a>
+  </div>
+</nav>
+{% endif %}
+
+<!-- ── FLASH ──────────────────────────────────────── -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+  <div class="flash-stack">
+    {% for cat, msg in messages %}
+    <div class="flash flash-{{ cat }}">
+      <span>{{ msg }}</span>
+      <button onclick="this.parentElement.remove()" class="flash-close">&times;</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endwith %}
+
+<!-- ── MAIN ──────────────────────────────────────── -->
+<main class="main-wrap">
+  {% block content %}{% endblock %}
+</main>
+
+<!-- ── FOOTER ──────────────────────────────────────── -->
+<footer class="site-footer">
+  <div class="container">
+    <p>&copy; 2026 Lost &amp; Found &middot; Helping reunite people with their belongings.</p>
+  </div>
+</footer>
+
+<!-- ── CLAIM MODAL ────────────────────────────────────── -->
+<div id="claimModal" class="modal-overlay">
+  <div class="notepad-sheet modal-content" style="max-width: 500px; padding: 2rem; margin: auto;">
+    <h2 class="page-title" style="font-size: 2rem; position:static; transform:none; left:0;">Claim Item</h2>
+    <p class="hand-label" style="text-align: center; font-size: 1.2rem; margin-bottom: 0;">Leave a message or contact info for the owner.</p>
+    
+    <form id="claimForm">
+      <input type="hidden" id="claimItemId">
+      <div class="form-group" style="margin-top: 1rem;">
+        <textarea id="claimDetails" class="notepad-textarea" placeholder="e.g. My number is 555-0123. The item has a scratch on the back..." required></textarea>
+      </div>
+      <div style="display:flex; gap: 1rem; margin-top: 2rem;">
+        <button type="button" class="btn btn-ghost" style="flex:1;" onclick="closeClaimModal()">Cancel</button>
+        <button type="submit" class="btn btn-success" style="flex:1;" id="claimSubmitBtn">Send Claim</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

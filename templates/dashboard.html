@@ -1,0 +1,144 @@
+{% extends "base.html" %}
+{% block title %}Dashboard – Lost & Found{% endblock %}
+{% block content %}
+
+{% macro render_item_card(item) %}
+<div class="item-card" data-id="{{ item.id }}">
+  <a href="{{ url_for('item_detail', item_id=item.id) }}" class="card-link">
+    <div class="card-img-wrap">
+      {% if item.image_path %}
+      <img src="{{ url_for('uploaded_file', filename=item.image_path) }}"
+           alt="{{ item.title }}" class="card-img" loading="lazy"/>
+      {% else %}
+      <div class="card-img-placeholder">
+        <span>📷</span>
+      </div>
+      {% endif %}
+      <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+      {% if item.claim_status != 'Available' %}
+      <span class="badge badge-claim badge-{{ item.claim_status|lower }}">{{ item.claim_status }}</span>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <div class="card-meta">
+        <span class="card-category">{{ item.category }}</span>
+        <span class="card-date">{{ item.created_at[:10] }}</span>
+      </div>
+      <h3 class="card-title">{{ item.title }}</h3>
+      <p class="card-location">📍 {{ item.location }}</p>
+      <p class="card-desc">{{ item.description[:80] }}{% if item.description|length > 80 %}…{% endif %}</p>
+      <p class="card-reporter">Reported by <strong>{{ item.username }}</strong></p>
+    </div>
+  </a>
+  {% if item.claim_status == 'Available' and item.status == 'Found' %}
+  <div class="card-action">
+    <button class="btn btn-success btn-sm btn-full claim-btn"
+            data-id="{{ item.id }}"
+            onclick="claimItem({{ item.id }}, this)">
+      🤝 Claim This Item
+    </button>
+  </div>
+  {% endif %}
+</div>
+{% endmacro %}
+
+<!-- ── Hero Stats ── -->
+<section class="hero-stats">
+  <div class="container">
+    <div class="hero-top">
+      <div>
+        <h1 class="page-title">Community Dashboard</h1>
+        <p class="page-sub">Browse lost &amp; found items reported in your area.</p>
+      </div>
+      <a href="{{ url_for('report') }}" class="btn btn-primary btn-lg">+ Report an Item</a>
+    </div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <span class="stat-num">{{ stats.total or 0 }}</span>
+        <span class="stat-label">Total Reports</span>
+      </div>
+      <div class="stat-card stat-lost">
+        <span class="stat-num">{{ stats.lost_count or 0 }}</span>
+        <span class="stat-label">Items Lost</span>
+      </div>
+      <div class="stat-card stat-found">
+        <span class="stat-num">{{ stats.found_count or 0 }}</span>
+        <span class="stat-label">Items Found</span>
+      </div>
+      <div class="stat-card stat-reunited">
+        <span class="stat-num">{{ stats.reunited or 0 }}</span>
+        <span class="stat-label">Reunited</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Search & Filter ── -->
+<section class="search-section">
+  <div class="container">
+    <div class="search-bar" style="background:none; box-shadow:none; border:none; gap: 2rem;">
+      <div style="flex: 2; position: relative;">
+        <input type="text" id="searchInput" class="notepad-input"
+               placeholder="🔍  Search by name, location or description…"/>
+      </div>
+      <div style="flex: 1; position: relative;">
+        <select id="categoryFilter" class="notepad-select">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+          <option value="{{ cat }}">{{ cat }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="status-tabs" style="align-self: flex-end;">
+        <button class="tab-btn active" data-status="">All</button>
+        <button class="tab-btn" data-status="Lost">Lost</button>
+        <button class="tab-btn" data-status="Found">Found</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── Dual Feed ── -->
+<section class="dual-feed container" id="dualFeed">
+  <!-- LOST COLUMN -->
+  <div class="feed-col">
+    <div class="feed-header feed-lost">
+      <span class="feed-dot lost-dot"></span>
+      <h2>Recent Lost Items</h2>
+    </div>
+    <div class="item-grid" id="lostGrid">
+      {% for item in lost_items %}
+      {{ render_item_card(item) }}
+      {% else %}
+      <div class="empty-state">
+        <span>😌</span><p>No lost items reported yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- FOUND COLUMN -->
+  <div class="feed-col">
+    <div class="feed-header feed-found">
+      <span class="feed-dot found-dot"></span>
+      <h2>Recent Found Items</h2>
+    </div>
+    <div class="item-grid" id="foundGrid">
+      {% for item in found_items %}
+      {{ render_item_card(item) }}
+      {% else %}
+      <div class="empty-state">
+        <span>🎉</span><p>No found items yet.</p>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Search Results (hidden by default) -->
+<section class="container" id="searchResults" style="display:none;">
+  <h2 class="results-title">Search Results</h2>
+  <div class="item-grid-single" id="resultsGrid"></div>
+</section>
+
+{% endblock %}

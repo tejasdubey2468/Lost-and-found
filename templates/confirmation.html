@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Item Submitted – Lost & Found{% endblock %}
+{% block content %}
+<div class="container page-narrow">
+  <div class="confirmation-card">
+    <div class="confirm-icon">✅</div>
+    <h1 class="confirm-title">Report Submitted!</h1>
+    <p class="confirm-sub">Thank you for helping the community. Your report is now live on the dashboard.</p>
+
+    <div class="confirm-details">
+      <div class="confirm-row">
+        <span class="confirm-label">Item</span>
+        <span class="confirm-val">{{ item.title }}</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">Status</span>
+        <span class="badge badge-{{ item.status|lower }}">{{ item.status }}</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">Category</span>
+        <span class="confirm-val">{{ item.category }}</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">Location</span>
+        <span class="confirm-val">📍 {{ item.location }}</span>
+      </div>
+      <div class="confirm-row">
+        <span class="confirm-label">Reported</span>
+        <span class="confirm-val">{{ item.created_at }}</span>
+      </div>
+    </div>
+
+    <div class="confirm-actions">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-primary">← Back to Dashboard</a>
+      <a href="{{ url_for('report') }}" class="btn btn-ghost">Report Another</a>
+      <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-ghost">View Item</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

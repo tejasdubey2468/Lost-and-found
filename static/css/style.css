@@ -1,0 +1,670 @@
+/* ═══════════════════════════════════════════════════════
+   Lost & Found – Vintage Notepad Design System
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Tokens ──────────────────────────────────────────── */
+:root {
+  --paper-yellow:   #fdfbd3;
+  --line-blue:      #e1eef7;
+  --margin-red:     #fabdbd;
+  --charcoal:       #2d3436;
+  --text:           #444;
+  --text-muted:     #666;
+  --primary:        #d35400; /* Binder orange */
+  --primary-dark:   #b84800;
+  --success:        #27ae60;
+  --danger:         #c0392b;
+  --tape-color:     rgba(255, 255, 255, 0.4);
+  --shadow-notepad: 0 4px 15px rgba(0,0,0,0.1);
+  --font-main:      'Patrick Hand', cursive;
+  --font-accent:    'Gochi Hand', cursive;
+  --font-serif:     'Playfair Display', serif;
+}
+
+/* ── Reset ────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--paper-yellow);
+  /* Ruled Paper effect */
+  background-image: 
+    linear-gradient(var(--line-blue) 1px, transparent 1px),
+    linear-gradient(90deg, var(--margin-red) 2px, transparent 2px);
+  background-size: 100% 30px, 100% 100%;
+  background-position: 0 0, 50px 0;
+  background-attachment: fixed;
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  font-size: 1.15rem;
+}
+
+/* ── Animations ───────────────────────────────────────── */
+@keyframes float {
+  0%   { transform: translateY(0px) rotate(0deg); }
+  50%  { transform: translateY(-5px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes tearOff {
+  0%   { transform: rotate(0) translateY(0); opacity: 1; }
+  20%  { transform: rotate(-5deg) translateY(10px); }
+  100% { transform: rotate(-15deg) translateY(500px); opacity: 0; }
+}
+
+@keyframes scribble {
+  0% { transform: scaleX(0); }
+  100% { transform: scaleX(1); }
+}
+
+.fade-out-tear { animation: tearOff 0.8s ease-in forwards; pointer-events: none; }
+
+/* ── Navigation ───────────────────────────────────────── */
+.navbar {
+  background: #34495e; /* Darker binder look */
+  color: #fff;
+  padding: 0.5rem 0;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.nav-logo {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 1.6rem;
+  color: #fff;
+  text-decoration: none;
+}
+
+.hamburger {
+  display: none;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+
+.mobile-menu {
+  display: none;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.nav-link {
+  color: #bdc3c7;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: #fff;
+}
+
+/* ── Item Cards (Notes) ────────────────────────────── */
+.dual-feed {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
+  padding: 2rem;
+}
+
+.item-card {
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  box-shadow: var(--shadow-notepad);
+  position: relative;
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  margin-bottom: 2rem;
+}
+
+/* Tape Sticker effect */
+.item-card::before {
+  content: "";
+  position: absolute;
+  top: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 35px;
+  background: var(--tape-color);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  z-index: 2;
+}
+
+.item-card:hover {
+  transform: translateY(-10px) rotate(2deg);
+  box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* 16:9 Aspect Ratio Image */
+.card-img-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%; /* 16:9 */
+  overflow: hidden;
+  background: #f0f0f0;
+  border-radius: 2px;
+  margin-bottom: 1rem;
+}
+
+.card-img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.card-img-placeholder {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 3rem;
+  opacity: 0.3;
+}
+
+.card-body h3 {
+  font-family: var(--font-accent);
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+  color: var(--charcoal);
+}
+
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  border-bottom: 1px dashed #ccc;
+  padding-bottom: 0.3rem;
+  margin-bottom: 0.8rem;
+}
+
+.card-desc {
+  font-style: italic;
+  font-size: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Badges (Stickers) ────────────────────────────── */
+.badge {
+  display: inline-block;
+  padding: 0.3rem 0.8rem;
+  border-radius: 4px;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  transform: rotate(-5deg);
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 5;
+  box-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.badge-lost { background: #ff7675; color: white; }
+.badge-found { background: #55efc4; color: #00b894; }
+
+/* ── Interaction Buttons ─────────────────────────────── */
+.btn {
+  font-family: var(--font-accent);
+  padding: 0.8rem 1.5rem;
+  border: 2px solid var(--charcoal);
+  background: white;
+  color: var(--charcoal);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+  box-shadow: 4px 4px 0px var(--charcoal);
+  text-decoration: none;
+  display: inline-block;
+}
+
+.btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0px var(--charcoal);
+}
+
+.btn-primary {
+  background: #ffeaa7; /* Manila folder yellow */
+}
+
+.btn-success {
+  background: #55efc4;
+}
+
+.btn-sm {
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+}
+
+/* ── Notepad Report Page ── */
+.notepad-page-container {
+  display: flex;
+  justify-content: center;
+  padding: 3rem 2rem;
+}
+
+.notepad-sheet {
+  background: white;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 3rem;
+  box-shadow: 10px 10px 0px rgba(0,0,0,0.05);
+  border: 1px solid #eee;
+  position: relative;
+  transition: transform 0.4s ease;
+}
+
+.notepad-sheet::before {
+  content: "";
+  position: absolute;
+  top: 15px; left: 15px; right: 15px; bottom: 15px;
+  border-left: 2px solid var(--margin-red);
+  pointer-events: none;
+}
+
+.notepad-sheet h1, .notepad-sheet h2 {
+  font-family: var(--font-accent);
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.back-link {
+  display: inline-block;
+  margin-bottom: 2rem;
+  color: var(--charcoal);
+  text-decoration: none;
+  font-family: var(--font-accent);
+  font-size: 1.2rem;
+  transition: color 0.2s;
+}
+
+.back-link:hover { color: var(--primary); }
+
+/* ── Scrap Paper List Items ── */
+.scrap-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.scrap-paper {
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  box-shadow: 4px 4px 0px rgba(0,0,0,0.05);
+  position: relative;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  transition: all 0.2s;
+}
+
+.scrap-paper:nth-child(even) { transform: rotate(0.8deg); }
+.scrap-paper:nth-child(odd) { transform: rotate(-0.5deg); }
+
+.scrap-paper:hover {
+  transform: scale(1.02) rotate(0deg);
+  box-shadow: 6px 6px 15px rgba(0,0,0,0.1);
+  z-index: 5;
+}
+
+.scrap-img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 2px;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.1);
+}
+
+.scrap-content { flex: 1; }
+.scrap-actions { display: flex; gap: 0.5rem; }
+
+/* ── Notepad Inputs ── */
+.notepad-input, .notepad-textarea, .notepad-select {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid var(--line-blue);
+  font-family: var(--font-main);
+  font-size: 1.4rem;
+  padding: 0.8rem 0.5rem;
+  margin-top: 0.5rem;
+  color: #333;
+  transition: all 0.3s ease;
+  position: relative;
+  border-radius: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.notepad-textarea {
+  background-image: linear-gradient(transparent 95%, var(--line-blue) 0);
+  background-size: 100% 1.8rem;
+  line-height: 1.8rem;
+  min-height: 120px;
+}
+
+.notepad-input:focus, .notepad-textarea:focus, .notepad-select:focus {
+  outline: none;
+  background: rgba(255, 234, 167, 0.25); /* Highlighter Yellow */
+  border-bottom-color: var(--primary);
+  box-shadow: 0 4px 6px -4px rgba(0,0,0,0.1);
+}
+
+.notepad-input:focus::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--primary);
+  transform-origin: left;
+  animation: scribble 0.3s ease-out forwards;
+}
+
+/* Custom dropdown arrow for notepad-select */
+.notepad-select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23d35400' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 18px;
+  padding-right: 40px;
+}
+
+.notepad-select option {
+  background: var(--paper-yellow);
+  font-family: var(--font-main);
+}
+
+.hand-label {
+  font-family: var(--font-accent);
+  font-size: 1.5rem;
+  display: block;
+  margin-bottom: 0.2rem;
+  color: var(--charcoal);
+}
+
+.step-nav-center {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin-top: 3rem;
+}
+
+.status-picker {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0;
+}
+
+/* ── Type Picker (Report Page Step 1) ── */
+.type-picker {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  margin-top: 1rem;
+}
+
+.type-card {
+  background: white;
+  padding: 3rem 2rem;
+  border: 2px dashed #ccc;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+.type-card:hover {
+  border-color: var(--primary);
+  background: #fdfde0;
+  transform: translateY(-5px) rotate(-1deg);
+}
+
+.type-card.selected {
+  border: 2px solid var(--primary);
+  background: #fff9e6;
+  box-shadow: 8px 8px 0px var(--primary);
+  transform: translateY(-5px) rotate(1deg);
+}
+
+.type-card input { display: none; }
+.type-icon { font-size: 4rem; display: block; }
+.type-label { font-family: var(--font-accent); font-size: 1.8rem; font-weight: 700; color: var(--charcoal); }
+.type-sub { font-size: 1rem; color: var(--text-muted); line-height: 1.3; }
+
+.status-option {
+  flex: 1;
+  border: 2px dashed #ccc;
+  padding: 2rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.status-option:hover, .status-option.selected {
+  border-color: var(--primary);
+  background: #fdfde0;
+  transform: rotate(-1deg);
+}
+
+.status-option input { display: none; }
+.status-icon { display: block; font-size: 3rem; margin-bottom: 1rem; }
+.status-text { font-family: var(--font-accent); font-size: 1.4rem; }
+
+.form-step { display: none; }
+.form-step.active { display: block; animation: fadeIn 0.4s forwards; }
+
+.step-bar { display: flex; align-items: center; justify-content: center; margin-bottom: 3rem; }
+.step { font-family: var(--font-accent); opacity: 0.3; }
+.step.active { opacity: 1; color: var(--primary); }
+.step-line { width: 40px; height: 2px; background: #ddd; margin: 0 1rem; }
+
+/* ── Search Bar (Binder Clip) ─────────────────────────── */
+.search-section {
+  padding: 4rem 2rem 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.search-bar {
+  background: #eee;
+  padding: 0.5rem 1rem;
+  border: 2px solid #ccc;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  font-family: var(--font-main);
+  font-size: 1.3rem;
+  padding: 0.5rem;
+  width: 400px;
+}
+
+.search-input:focus { outline: none; border-bottom: 2px solid var(--primary); }
+
+/* ── Typography & Stats ────────────────────────────── */
+.page-title {
+  text-align: center;
+  font-family: var(--font-serif);
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  position: relative;
+  display: inline-block;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.page-title::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 8px;
+  background: rgba(255, 234, 167, 0.5);
+  width: 100%;
+  z-index: -1;
+}
+
+.hero-stats {
+  padding: 2rem;
+  margin-bottom: 3rem;
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.stat-card {
+  text-align: center;
+  background: white;
+  padding: 1.5rem;
+  border: 1px solid #ddd;
+  box-shadow: 4px 4px 0px #ddd;
+}
+
+.stat-num {
+  display: block;
+  font-size: 2.5rem;
+  font-weight: 700;
+  font-family: var(--font-accent);
+}
+
+.detail-layout {
+  display: flex;
+  gap: 3rem;
+  align-items: flex-start;
+}
+
+.detail-img-side { flex: 1; min-width: 0; }
+.detail-text-side { flex: 1.5; min-width: 0; }
+
+@media (max-width: 768px) {
+  .detail-layout { flex-direction: column; }
+  .detail-img-side, .detail-text-side { width: 100%; }
+}
+
+/* Remove old auth page clashing styles */
+.auth-page, .auth-hero, .auth-card { display: block; border:none; box-shadow:none; background:none; padding: 0; }
+.auth-page .container { padding: 4rem 2rem; }
+
+/* ── Coffee Stain ── */
+.coffee-stain {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 150px;
+  height: 150px;
+  background: radial-gradient(circle, rgba(111, 78, 55, 0.1) 0%, rgba(111, 78, 55, 0.05) 40%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ── Mobile View ── */
+@media (max-width: 768px) {
+  .nav-links, .nav-right { display: none; }
+  .hamburger { display: block; }
+  .mobile-menu {
+    display: none; /* JS toggles 'active' */
+    position: absolute;
+    top: 100%; left: 0; width: 100%;
+    background: #34495e;
+    padding: 1rem;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  .mobile-menu.active { display: flex; }
+  .stats-row { grid-template-columns: repeat(2, 1fr); }
+  .dual-feed { grid-template-columns: 1fr; }
+  .search-input { width: 100%; }
+}
+
+/* ── Stickers (Floating decoration) ────────────────── */
+.sticker {
+  position: fixed;
+  width: 50px;
+  height: 50px;
+  z-index: -1;
+  opacity: 0.2;
+  pointer-events: none;
+  animation: float 10s infinite ease-in-out;
+}
+
+/* ── Footer ───────────────────────────────────────────── */
+.site-footer {
+  margin-top: auto;
+  padding: 2rem;
+  text-align: center;
+  border-top: 1px dashed #ccc;
+  color: var(--text-muted);
+}
+
+/* ── Modal ────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.active {
+  display: flex;
+  animation: fadeIn 0.2s ease-out forwards;
+}
+.modal-content {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.modal-overlay.active .modal-content {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}

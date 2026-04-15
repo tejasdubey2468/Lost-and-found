@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Register – Lost & Found{% endblock %}
+{% block content %}
+<div class="notepad-page-container">
+  <div class="notepad-sheet" style="max-width: 500px;">
+    <div class="auth-brand" style="text-align: center; margin-bottom: 2rem;">
+      <span style="font-size: 3rem; display: block; margin-bottom: 1rem;">✍️</span>
+      <h1 class="page-title" style="position:static; transform:none; left:0; font-size: 2.2rem;">Join the Board</h1>
+      <p class="page-sub">Create your community ledger</p>
+    </div>
+
+    <form method="POST" action="{{ url_for('register') }}" class="auth-form" novalidate>
+      <div class="form-group">
+        <label for="username" class="hand-label" style="font-size: 1.1rem;">Username</label>
+        <input type="text" id="username" name="username" class="notepad-input"
+               placeholder="Your name" value="{{ username or '' }}" required autocomplete="username"/>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label for="email" class="hand-label" style="font-size: 1.1rem;">Email Address</label>
+        <input type="email" id="email" name="email" class="notepad-input"
+               placeholder="you@example.com" value="{{ email or '' }}" required autocomplete="email"/>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label for="password" class="hand-label" style="font-size: 1.1rem;">Password</label>
+        <div class="input-eye-wrap" style="position:relative;">
+          <input type="password" id="password" name="password" class="notepad-input"
+                 placeholder="6+ characters" required autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePassword('password')"
+                   style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer;">👁</button>
+        </div>
+      </div>
+      <div class="form-group" style="margin-top: 1rem;">
+        <label for="confirm_password" class="hand-label" style="font-size: 1.1rem;">Confirm Password</label>
+        <div class="input-eye-wrap" style="position:relative;">
+          <input type="password" id="confirm_password" name="confirm_password" class="notepad-input"
+                 placeholder="Repeat it here" required autocomplete="new-password"/>
+          <button type="button" class="eye-btn" onclick="togglePassword('confirm_password')"
+                   style="position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer;">👁</button>
+        </div>
+      </div>
+      <div style="text-align:center; margin-top: 3rem;">
+        <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">Create Account</button>
+      </div>
+    </form>
+
+    <p class="auth-switch" style="text-align: center; margin-top: 2rem; font-family: var(--font-accent);">
+      Already have an account?
+      <a href="{{ url_for('login') }}" style="color: var(--primary); text-decoration: none;">Sign in &rarr;</a>
+    </p>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function togglePassword(id) {
+  const el = document.getElementById(id);
+  el.type = el.type === 'password' ? 'text' : 'password';
+}
+</script>
+{% endblock %}

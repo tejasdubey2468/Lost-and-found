@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+{% block title %}Report an Item – Lost & Found{% endblock %}
+{% block content %}
+<div class="notepad-page-container">
+  <div class="notepad-sheet">
+    <div class="page-header">
+      <h1 class="page-title">Report an Item</h1>
+      <p class="page-sub">Fill in the missing details below to help the community.</p>
+    </div>
+
+    <!-- Step indicator -->
+    <div class="step-bar">
+      <div class="step active" id="step-ind-1"><span>1</span> Status</div>
+      <div class="step-line"></div>
+      <div class="step" id="step-ind-2"><span>2</span> Details</div>
+      <div class="step-line"></div>
+      <div class="step" id="step-ind-3"><span>3</span> Photo</div>
+    </div>
+
+    <form method="POST" action="{{ url_for('report') }}"
+          enctype="multipart/form-data" id="reportForm" novalidate>
+
+      <!-- ── Step 1: Type ── -->
+      <div class="form-step active" id="step1">
+        <h2 class="step-title" style="text-align:center; margin-bottom:2.5rem;">Which side are you on?</h2>
+        <div class="type-picker">
+          <label class="type-card lost-card {% if form.get('status')=='Lost' %}selected{% endif %}" id="lostOption">
+            <input type="radio" name="status" value="Lost"
+                   {% if form.get('status','Lost')=='Lost' %}checked{% endif %}
+                   required onchange="pickStatus(this)"/>
+            <span class="type-icon">😟</span>
+            <span class="type-label">I Lost Something</span>
+            <span class="type-sub">I'm looking for a missing item</span>
+          </label>
+
+          <label class="type-card found-card {% if form.get('status')=='Found' %}selected{% endif %}" id="foundOption">
+            <input type="radio" name="status" value="Found"
+                   {% if form.get('status')=='Found' %}checked{% endif %}
+                   onchange="pickStatus(this)"/>
+            <span class="type-icon">🎉</span>
+            <span class="type-label">I Found Something</span>
+            <span class="type-sub">I want to help someone get it back</span>
+          </label>
+        </div>
+        <div class="step-nav-center" style="margin-top: 3rem;">
+          <button type="button" class="btn btn-primary btn-lg" onclick="nextStep(1)">Continue &rarr;</button>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Details ── -->
+      <div class="form-step" id="step2">
+        <h2 class="step-title">The Details</h2>
+        <div class="form-group">
+          <label for="title" class="hand-label">What is it? <span class="req">*</span></label>
+          <input type="text" id="title" name="title" class="notepad-input"
+                 placeholder="e.g. Blue Backpack, Gold Ring"
+                 value="{{ form.get('title','') }}" required/>
+        </div>
+        <div class="form-row">
+          <div class="form-group" style="flex:1">
+            <label for="category" class="hand-label">Category <span class="req">*</span></label>
+            <select id="category" name="category" class="notepad-input" required>
+              <option value="">Choose one...</option>
+              {% for cat in categories %}
+              <option value="{{ cat }}" {% if form.get('category') == cat %}selected{% endif %}>{{ cat }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group" style="flex:2">
+            <label for="location" class="hand-label">Where? <span class="req">*</span></label>
+            <input type="text" id="location" name="location" class="notepad-input"
+                   placeholder="e.g. Near the fountain"
+                   value="{{ form.get('location','') }}" required/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="description" class="hand-label">Description <span class="req">*</span></label>
+          <textarea id="description" name="description" class="notepad-textarea" rows="4"
+                    placeholder="Describe unique marks, contents, size..."
+                    required>{{ form.get('description','') }}</textarea>
+          <span class="char-count" id="descCount">0 / 500</span>
+        </div>
+        <div class="step-nav-center">
+          <button type="button" class="btn btn-ghost" onclick="prevStep(2)">&larr; Back</button>
+          <button type="button" class="btn btn-primary" onclick="nextStep(2)">Explore Details &rarr;</button>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Photo ── -->
+      <div class="form-step" id="step3">
+        <h2 class="step-title">Visual Proof</h2>
+        <div class="upload-zone-wrapper">
+          <div class="upload-zone" id="uploadZone">
+            <input type="file" id="image" name="image" accept="image/*"
+                   class="upload-input" onchange="previewImage(this)"/>
+            <div class="upload-placeholder" id="uploadPlaceholder">
+              <span class="upload-icon">📸</span>
+              <p>Click to add photo</p>
+            </div>
+            <img id="imagePreview" class="upload-preview" src="" alt="Preview" style="display:none"/>
+          </div>
+        </div>
+        <div class="step-nav-center">
+          <button type="button" class="btn btn-ghost" onclick="prevStep(3)">&larr; Back</button>
+          <button type="submit" class="btn btn-success btn-lg" id="submitBtn">
+            📌 Post to Board
+          </button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  let currentStep = 1;
+
+  function showStep(n) {
+    document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.step').forEach((s, i) => {
+      s.classList.toggle('active', i < n);
+      s.classList.toggle('done',   i < n - 1);
+    });
+    document.getElementById('step' + n).classList.add('active');
+    currentStep = n;
+  }
+
+  function nextStep(n) {
+    // Validate current step
+    if (n === 1) {
+      if (!document.querySelector('input[name="status"]:checked')) {
+        alert('Please select Lost or Found.');
+        return;
+      }
+    }
+    if (n === 2) {
+      const fields = ['title','category','location','description'];
+      for (const f of fields) {
+        const el = document.getElementById(f);
+        if (!el.value.trim()) {
+          el.focus();
+          el.classList.add('input-error');
+          return;
+        } else { el.classList.remove('input-error'); }
+      }
+    }
+    showStep(n + 1);
+  }
+
+  function prevStep(n) { showStep(n - 1); }
+
+  function pickStatus(radio) {
+    document.querySelectorAll('.status-option').forEach(el => el.classList.remove('selected'));
+    radio.closest('.status-option').classList.add('selected');
+  }
+
+  function previewImage(input) {
+    if (input.files && input.files[0]) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        const preview = document.getElementById('imagePreview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('uploadPlaceholder').style.display = 'none';
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  // Char counter
+  const desc = document.getElementById('description');
+  const counter = document.getElementById('descCount');
+  if (desc) {
+    desc.addEventListener('input', () => {
+      counter.textContent = desc.value.length + ' / 500';
+      if (desc.value.length > 500) counter.style.color = 'var(--danger)';
+      else counter.style.color = '';
+    });
+  }
+
+  // Drag & drop
+  const zone = document.getElementById('uploadZone');
+  if (zone) {
+    zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+    zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('drag-over');
+      const file = e.dataTransfer.files[0];
+      if (file) {
+        document.getElementById('image').files = e.dataTransfer.files;
+        previewImage({ files: [file] });
+      }
+    });
+  }
+
+  // If form was submitted with errors, restore step
+  {% if form.get('title') or form.get('description') %}
+  showStep(1);
+  {% endif %}
+</script>
+{% endblock %}
