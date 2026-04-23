@@ -1,7 +1,17 @@
 import sqlite3
 import os
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'lostfound.db')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DB_PATH = os.path.join(BASE_DIR, 'lostfound.db')
+
+if os.environ.get('VERCEL'):
+    # On Vercel, move the DB to /tmp so it's writable
+    TEMP_DB = '/tmp/lostfound.db'
+    if not os.path.exists(TEMP_DB):
+        import shutil
+        if os.path.exists(DB_PATH):
+            shutil.copy2(DB_PATH, TEMP_DB)
+    DB_PATH = TEMP_DB
 
 
 def get_db():

@@ -1,5 +1,6 @@
 import os
 import uuid
+import sqlite3
 from functools import wraps
 from flask import (Flask, render_template, request, redirect, url_for,
                    session, flash, jsonify, send_from_directory, abort)
@@ -9,7 +10,10 @@ from database import get_db, init_db
 
 # ─── App Setup ────────────────────────────────────────────────────────────────
 BASE_DIR      = os.path.dirname(os.path.abspath(__file__))
-UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
+if os.environ.get('VERCEL'):
+    UPLOAD_FOLDER = '/tmp/uploads'
+else:
+    UPLOAD_FOLDER = os.path.join(BASE_DIR, 'uploads')
 ALLOWED_EXT   = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
 
 app = Flask(__name__)
